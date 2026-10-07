@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><title>論語節選・即時檢測</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+:root{--bg:#f6f1e7;--c:#fffdf8;--t:#2b2118;--m:#7a6a58;--a:#8c2f1f;--ok:#2e7d4f;--no:#b3261e;--b:#dccfb8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1c1814;--c:#262019;--t:#efe6d6;--m:#a8998a;--a:#e08a74;--ok:#6cc08d;--no:#f08a82;--b:#473d31}}
+:root[data-theme=dark]{--bg:#1c1814;--c:#262019;--t:#efe6d6;--m:#a8998a;--a:#e08a74;--ok:#6cc08d;--no:#f08a82;--b:#473d31}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.7 "Noto Serif TC","PMingLiU",serif}
+main{max-width:640px;margin:0 auto;padding:18px 14px 40px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:18px;margin-bottom:14px}
+h1{margin:4px 0;font-size:26px;color:var(--a)}small,.m{color:var(--m)}
+.stats{display:flex;gap:10px;margin-top:10px}.stats div{flex:1;text-align:center;border:1px solid var(--b);border-radius:8px;padding:6px}.stats b{display:block;font-size:22px;color:var(--a)}
+label{display:block;margin-top:12px;font-weight:700}select,input{width:100%;padding:10px;font:inherit;border:1px solid var(--b);border-radius:8px;background:var(--bg);color:var(--t)}
+button{font:inherit;cursor:pointer;border:1px solid var(--a);background:var(--a);color:#fff;border-radius:8px;padding:10px 18px}button.g{background:none;color:var(--a)}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;background:var(--bg);color:var(--t);border:1px solid var(--b)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--c))}.opt.no{border-color:var(--no);background:color-mix(in srgb,var(--no) 18%,var(--c))}
+.q{font-size:18px;margin:6px 0 10px}.tag{display:inline-block;font-size:13px;border:1px solid var(--b);border-radius:20px;padding:0 10px;color:var(--m)}
+.ex{margin-top:10px;padding:10px;border-left:4px solid var(--a);background:var(--bg);display:none}
+.bar{height:8px;background:var(--b);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--a)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.hide{display:none}
+.rb{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:14px}.rb span:first-child{width:4.5em}.rb .bar{flex:1}
+</style></head><body><main>
+<div id="home"><div class="card"><div class="m">線上專屬特訓基地・文言閱讀力</div><h1>論語節選・即時檢測</h1>
+<small>依《論語節選》學而至堯曰命題・單題即時對答案與解析</small>
+<div class="stats"><div><b id="n1"></b>總題數</div><div><b id="n2"></b>涵蓋篇章</div><div><b>★</b>重要考題</div></div>
+<p><b>作答方式</b>：每題點選一個選項就立刻判定對錯並顯示解析。答錯不用擔心，看完解析後回到原文再讀一次。</p>
+<label>年級<select id="gr"><option>國小五年級<option>國小六年級<option>國中七年級<option>國中八年級<option>國中九年級<option>高中一年級<option>高中二年級<option>高中三年級<option>教師／家長<option>其他</select></label>
+<label>暱稱<input id="nk" placeholder="請輸入暱稱" maxlength="12"></label>
+<label>測驗範圍<select id="rg"></select></label>
+<p><button id="go">開始特訓</button></p></div></div>
+<div id="play" class="hide"><div class="card"><div class="row"><span>第 <b id="i"></b> / <span id="tot"></span> 題</span><span>得分 <b id="sc">0</b>　<span id="tm">00:00</span></span></div>
+<div class="bar"><i id="pg" style="width:0"></i></div></div>
+<div class="card"><span class="tag" id="tg"></span><div class="q" id="q"></div><div id="os"></div><div class="ex" id="ex"></div>
+<p class="row"><button class="g" id="hint">看提示</button><button id="nx" class="hide">下一題</button></p></div></div>
+<div id="end" class="hide"><div class="card"><h1 id="rt"></h1><p id="rs"></p><h3>能力雷達（各篇正確率）</h3><div id="rd"></div></div>
+<div class="card"><h3>需要回頭複習的題目</h3><div id="wr"></div></div>
+<div class="card"><h3>教練的話</h3><p id="co"></p><button id="again">再挑戰一次</button></div></div>
+</main>
+<script>
+// [篇, 題目, 正解, 錯1, 錯2, 錯3, 解析]
+const D=[
+["學而","「學而時習之，不亦說乎」中的「說」字意思是？","同「悅」，喜悅","說話","遊說","解說","說通「悅」。學習並適時實行，是令人欣喜的事。"],
+["學而","曾子「吾日三省吾身」所反省的三件事不包括？","待人是否謙讓","為人謀而不忠乎","與朋友交而不信乎","傳不習乎","三省：忠、信、習（所傳授的是否純熟）。"],
+["學而","「不患人之不己知，患不知人也」的意思是？","不怕別人不了解我，只怕我不了解別人","不怕沒人了解我，只怕沒有才能","不怕被人誤解，只怕被人遺忘","不必知人，只要自知","求人知是求其在他，君子求其在我；知人是進德修業所必須。"],
+["學而","「孝悌也者，其為仁之本與」意指？","孝順父母、敬愛兄長是行仁的根本","仁是孝悌的根本","孝悌只是小節","行仁要先學禮樂","有子認為君子務本，本立而道生。"],
+["學而","「父在，觀其志；父沒，觀其行；三年無改於父之道」孔子認為這樣算是？","孝","忠","智","勇","三年不改父親合理的規矩，可謂孝矣。"],
+["為政","「為政以德，譬如北辰，居其所而眾星共之」比喻？","以德治國，自然受人擁戴","君王要高高在上","治國要多觀星象","臣子要各守其位","北辰安然不動，眾星環繞，喻施政以德。"],
+["為政","孔子自述「六十而」的境界是？","耳順","不惑","知天命","從心所欲","十五志學、三十立、四十不惑、五十知天命、六十耳順、七十從心所欲不逾矩。"],
+["為政","「父母唯其疾之憂」孟武伯問孝，孔子的意思是？","讓父母只擔心你的健康","父母生病時要憂心","父母擔憂的只有疾病","孝子不可生病","倒裝還原為「父母唯憂其疾」，指謹慎持身，不讓父母多操心。"],
+["為政","「君子不器」的意思是？","君子不應像器具只限於一種用途","君子不使用器具","君子不重視器物","君子不愛財","器具各有專用；君子應博通，不拘於一才一藝。"],
+["為政","「學而不思則罔，思而不學則殆」的啟示是？","學與思要並重","只要多讀書即可","只要多思考即可","學習不如實作","學而不思會迷惘無得，思而不學則疑而不安。"],
+["為政","「人而無信，不知其可也」以什麼比喻信的重要？","大車無輗、小車無軏","舟無舵","鳥無翼","屋無梁","輗、軏是連接車與牲口的關鍵，沒有就無法前行。"],
+["八佾","「君子無所爭，必也射乎」孔子認為君子唯一可以競爭的是？","射禮（有風度的比賽）","辯論","科舉","賽馬","射箭前後都互相作揖，勝負後敗者飲酒，爭得有禮有風度。"],
+["八佾","林放問禮之本，孔子說「喪，與其易也，寧戚」是指？","辦喪事與其注重形式，不如內心哀戚","喪事要辦得盛大","喪事應從簡","喪事不必哀傷","禮貴在心誠，不在形式。"],
+["里仁","「朝聞道，夕死可矣」的意思是？","早上明白人生大道，晚上死也無憾","早上聽到消息，晚上就要死","早晚都要學習","求道要趁早","大道難聞，今生能聞能行，死而無憾。"],
+["里仁","「君子喻於義，小人喻於利」中「喻」意思是？","明白、曉得","比喻","告知","愉悅","君子只曉得義，小人只曉得利。"],
+["里仁","「放於利而行，多怨」意思是？","依個人利益行事，會招致許多怨恨","利益會使人快樂","有利可圖便少怨","行事要放遠利益","放，依也。"],
+["里仁","曾子說孔子之道「忠恕而已矣」，「恕」指？","推己及人","盡己之心","嚴格自律","博愛眾人","盡己之心待人謂之忠，推己及人之心謂之恕。"],
+["里仁","「見賢思齊焉，見不賢而內自省也」的做法是？","見賢者向他看齊，見不賢者反省自己","見賢者嫉妒","見不賢者批評","見不賢者疏遠","以他人為鏡。"],
+["里仁","「父母在，不遠遊，遊必有方」的「方」指？","固定的去處、準確的地址","方法","方向盤","道理","要讓父母知道自己的去向，免其掛心。"],
+["里仁","「君子欲訥於言，而敏於行」意思是？","說話要慎重遲鈍，做事要勤快敏捷","多說多做","少做多說","說話要快","君子言之不輕出，恥躬之不逮也。"],
+["公冶長","孔子責備宰予畫寢，用什麼比喻？","朽木不可雕也，糞土之牆不可圬也","玉不琢不成器","井底之蛙","揠苗助長","並由此改為「聽其言而觀其行」。"],
+["公冶長","孔子的志向是「老者安之，朋友信之，少者懷之」，「懷」是？","關懷、照顧","懷念","懷抱","懷疑","使老者安養、朋友互信、少者得到照顧。"],
+["雍也","孔子稱讚顏回好學，具體指？","不遷怒，不貳過","聞一知十","博學多聞","勤於寫作","不牽連別人，也不重犯相同的錯。"],
+["雍也","「一簞食，一瓢飲，在陋巷」孔子稱讚顏回哪一點？","安貧樂道，不改其樂","生活節儉","擅長持家","身體強健","別人憂愁難忍，顏回仍自得其樂。"],
+["雍也","「質勝文則野，文勝質則史」，怎樣才是君子？","文質彬彬","質重於文","文重於質","不文不質","文采與品質配合恰當，才是君子。"],
+["雍也","「智者樂水，仁者樂山」下一句「智者動，仁者」是？","靜","行","壽","樂","智者動、仁者靜；智者樂、仁者壽。"],
+["述而","「述而不作，信而好古」孔子以誰自比？","老彭","老子","周公","晏嬰","孔子自謙只傳述前人典籍而不創作。"],
+["述而","「默而識之，學而不厭，誨人不倦」三件事指？","默記在心、勤學不厭、教人不倦","多言、多學、多教","少言、少學、少教","求名、求利、求道","孔子說這三件事對他沒有難處。"],
+["述而","「不憤不啟，不悱不發，舉一隅不以三隅反，則不復也」的教學原則是？","啟發式教學，要能舉一反三","填鴨式教學","因材施教","有教無類","學生要先發憤、思考，老師才啟發。"],
+["述而","「飯疏食飲水，曲肱而枕之」下一句「不義而富且貴，於我如」？","浮雲","流水","糞土","塵埃","不合義理的富貴，對我來說像浮雲。"],
+["述而","孔子描述自己「發憤忘食，樂以忘憂，不知老之將至」，是回答誰的提問？","葉公","季康子","衛靈公","齊景公","葉公問孔子於子路，子路不對。"],
+["述而","「三人行，必有我師焉」中，面對不善者應該？","若自己也有，就改正","指責他","遠離他","忽視他","擇善者而從之，其不善者而改之。"],
+["述而","「君子坦蕩蕩，小人常戚戚」，「戚戚」指？","憂愁、患得患失","親戚","親近","悲傷落淚","君子光明正大而坦然，小人患得患失而憂懼。"],
+["泰伯","「士不可以不弘毅，任重而道遠」，「弘毅」指？","心胸寬大、意志堅強","博學多聞","謙虛有禮","勇猛剛強","以行仁為己任，死而後已。"],
+["泰伯","「不在其位，不謀其政」意思是？","不在那個職位，就不參與那個職位的事務","不當官就不要說話","不做事就不要領薪","要謀求更高職位","君子思不出其位。"],
+["子罕","「子絕四」，下列何者不在其中？","毋信","毋意","毋必","毋我","毋意、毋必、毋固、毋我。"],
+["子罕","「逝者如斯夫，不舍晝夜」孔子在什麼地方感嘆？","河川邊","高山上","城牆下","宗廟中","感嘆時光像流水一樣一去不返。"],
+["子罕","「歲寒，然後知松柏之後凋也」比喻？","艱難時才見人的節操","冬天要保暖","松柏長壽","季節變化","亂世知人心，板蕩識忠臣。"],
+["顏淵","「克己復禮為仁」顏淵問實行條目，孔子說的是？","非禮勿視、聽、言、動","博學、審問、慎思、明辨","溫、良、恭、儉、讓","知、仁、勇","約束自己、實踐禮的規範。"],
+["顏淵","齊景公問政，孔子答「君君，臣臣，父父，子子」意思是？","各盡自己的本分","君要像父親","臣要服從君","子要聽父親","若各不盡本分，天下就大亂。"],
+["顏淵","「君子之德風，小人之德草」比喻？","領導者的品德會影響群眾","君子像風一樣自由","小人像草一樣卑微","治國要順應自然","草上之風，必偃。"],
+["子路","「其身正，不令而行；其身不正，雖令不從」強調？","正人須先正己","命令要嚴格","法令要公平","下屬要服從","領導者以身作則最重要。"],
+["子路","「君子和而不同，小人同而不和」意思是？","君子與人和諧而不盲從，小人盲從而不和諧","君子與小人相同","君子不合群","小人最合群","和而不同：和諧相處但不同流合污。"],
+["憲問","「古之學者為己，今之學者為人」意思是？","古人為修養自己而學，今人為博取名利而學","古人學得多","今人學得少","古人為別人學","孔子感嘆學風改變。"],
+["憲問","「以德報怨，何如？」孔子的回答是？","以直報怨，以德報德","以德報怨最好","以怨報怨","不報怨也不報德","若以德報怨，那又拿什麼報答恩德呢？"],
+["衛靈公","「子貢問：有一言而可以終身行之者乎？」孔子答？","恕","仁","孝","信","其恕乎！己所不欲，勿施於人。"],
+["衛靈公","「工欲善其事，必先」？","利其器","勤其業","修其身","擇其友","做事前要先做好準備。"],
+["衛靈公","「吾嘗終日不食，終夜不寢，以思，無益，不如學也」強調？","思考要配合學習","不用思考","不必睡覺","思比學重要","與「學而不思則罔，思而不學則殆」相呼應。"],
+["衛靈公","「有教無類」的意思是？","教育不分類別，機會平等","教育要有分類","有教養就無類別","要選擇學生","不分貧賤富貴、聰明愚笨。"],
+["季氏","孔子說的「益者三友」不包括？","友便佞","友直","友諒","友多聞","有益：直、諒、多聞；有害：便辟、善柔、便佞。"],
+["季氏","君子有「三戒」，「及其老也，血氣既衰，戒之在」？","得","色","鬥","懼","少戒色，壯戒鬥，老戒得。"],
+["季氏","「君子有三畏」不包括下列何者？","畏小人","畏天命","畏大人","畏聖人之言","小人不知天命而不畏。"],
+["陽貨","「性相近也，習相遠也」的意思是？","天性相近，後天學習不同才有差距","天性差距大","習慣大家相同","性格無法改變","強調後天學習與環境的重要。"],
+["陽貨","「鄉願，德之賊也」，鄉願指？","同流合污、不得罪人的假好人","鄉下人","思鄉的人","願意幫忙的人","鄉願是道德的敗類。"],
+["子張","子貢比喻孔子之道像什麼？","數仞高的宮牆","高山","大海","日月","不得其門而入，就見不到宗廟之美、百官之富。"],
+["子張","子貢說君子有過失，如同？","日月之食","烏雲蔽日","落葉","潮起潮落","過也人皆見之，更也人皆仰之。"],
+["堯曰","「不知命，無以為君子也；不知禮，無以立也；不知言，」下一句是？","無以知人也","無以事君也","無以為仁也","無以行遠也","由言語辨是非，才能認識人的善惡邪正。"]
+];
+const $=id=>document.getElementById(id),P=[...new Set(D.map(d=>d[0]))];
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+$('n1').textContent=D.length;$('n2').textContent=P.length;
+$('rg').innerHTML='<option value="all">全部 '+P.length+' 篇（'+D.length+' 題）</option>'+Array.from({length:Math.ceil(P.length/5)},(_,k)=>'<option value="'+k+'">'+P.slice(k*5,k*5+5).join("・")+'</option>').join('');
+let Q,k,s,w,t0,tim,done;
+$('go').onclick=()=>{if(!$('nk').value.trim()){$('nk').focus();alert('請先填寫暱稱');return}
+const r=$('rg').value,ps=r=='all'?P:P.slice(r*5,r*5+5);Q=sh(D.filter(d=>ps.includes(d[0])));k=0;s=0;w=[];t0=Date.now();
+$('home').classList.add('hide');$('end').classList.add('hide');$('play').classList.remove('hide');$('tot').textContent=Q.length;
+clearInterval(tim);tim=setInterval(()=>{const x=(Date.now()-t0)/1000|0;$('tm').textContent=String(x/60|0).padStart(2,0)+':'+String(x%60).padStart(2,0)},500);show()};
+function show(){const d=Q[k];done=false;$('i').textContent=k+1;$('sc').textContent=s;$('pg').style.width=k/Q.length*100+'%';$('tg').textContent='《論語・'+d[0]+'》';$('q').textContent=d[1];
+$('ex').style.display='none';$('nx').classList.add('hide');$('hint').classList.remove('hide');
+$('os').innerHTML='';sh(d.slice(2,6)).forEach(o=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>pick(b,o);$('os').append(b)})}
+function pick(b,o){if(done)return;done=true;const d=Q[k],ok=o==d[2];
+document.querySelectorAll('.opt').forEach(x=>{if(x.textContent==d[2])x.classList.add('ok')});
+if(ok)s++;else{b.classList.add('no');w.push(d)}
+$('sc').textContent=s;$('ex').innerHTML='<b>'+(ok?'✔ 答對了！':'✘ 正解：'+d[2])+'</b><br>'+d[6];$('ex').style.display='block';
+$('hint').classList.add('hide');$('nx').textContent=k+1<Q.length?'下一題':'看成績';$('nx').classList.remove('hide')}
+$('hint').onclick=()=>{$('ex').innerHTML='💡 本題出自《論語・'+Q[k][0]+'》，回想原文語境再作答。';$('ex').style.display='block'};
+$('nx').onclick=()=>{if(++k<Q.length)show();else finish()};
+function finish(){clearInterval(tim);$('play').classList.add('hide');$('end').classList.remove('hide');
+const p=Math.round(s/Q.length*100);$('rt').textContent=p+' 分';$('rs').textContent=$('nk').value+'（'+$('gr').value+'）答對 '+s+' / '+Q.length+' 題，用時 '+$('tm').textContent;
+const st={};Q.forEach(d=>st[d[0]]=st[d[0]]||[0,0]);Q.forEach(d=>st[d[0]][1]++);Q.forEach(d=>{if(!w.includes(d))st[d[0]][0]++});
+$('rd').innerHTML=Object.entries(st).map(([n,[a,b]])=>'<div class="rb"><span>'+n+'</span><div class="bar"><i style="width:'+a/b*100+'%"></i></div><span>'+a+'/'+b+'</span></div>').join('');
+$('wr').innerHTML=w.length?w.map(d=>'<p><span class="tag">'+d[0]+'</span><br>'+d[1]+'<br><b>答案：'+d[2]+'</b><br><small>'+d[6]+'</small></p>').join(''):'全部答對，太棒了！';
+$('co').textContent=p>=90?'表現優異！可以挑戰其他範圍，或試著默寫重要章句。':p>=70?'基礎不錯，把錯題的原文再讀一遍，印象會更深。':'別灰心，先回到原文與白話解，邊讀邊理解，再來一次。'}
+$('again').onclick=()=>{$('end').classList.add('hide');$('home').classList.remove('hide')};
+</script></body></html>
